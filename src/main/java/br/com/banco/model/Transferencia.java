@@ -1,23 +1,19 @@
 package br.com.banco.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+import br.com.banco.repository.TransferenciaRequestDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -27,14 +23,28 @@ public class Transferencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private LocalDateTime data_transferencia;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private Instant data_transferencia;
     private BigDecimal valor;
     private String tipo;
     private String nome_operador_transacao;
-    
+    @Column (name = "conta_id", insertable = false, updatable = false)
+    private int conta_id;
+
+
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "conta", nullable = false, updatable = false)
+    @JoinColumn(name = "conta_id", nullable = false, updatable = false)
     Conta conta = new Conta();
+
+    public Transferencia(TransferenciaRequestDTO data){
+        this.data_transferencia = data.data_transferencia();
+        this.valor = data.valor();
+        this.tipo = data.tipo();
+        this.nome_operador_transacao = data.nome_operador_transacao();
+        this.conta_id = data.conta().getId();
+    }
+
+
     
 }
